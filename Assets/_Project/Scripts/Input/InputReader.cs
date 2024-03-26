@@ -8,8 +8,6 @@ namespace Coraline {
     public class InputReader : ScriptableObject, IPlayerActions {
         public event UnityAction<Vector2> Move = delegate { };
         public event UnityAction<Vector2, bool> Look = delegate { };
-        public event UnityAction EnableMouseControlCamera = delegate { };
-        public event UnityAction DisableMouseControlCamera = delegate { };
         public event UnityAction<bool> Jump = delegate { };
 
         private PlayerInputActions _inputActions;
@@ -41,14 +39,6 @@ namespace Coraline {
         }
 
         public void OnMouseControlCamera(InputAction.CallbackContext context) {
-            switch (context.phase) {
-                case InputActionPhase.Started:
-                    EnableMouseControlCamera.Invoke();
-                    break;
-                case InputActionPhase.Canceled:
-                    DisableMouseControlCamera.Invoke();
-                    break;
-            }
         }
 
         public void OnRun(InputAction.CallbackContext context) {

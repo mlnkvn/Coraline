@@ -1,70 +1,54 @@
-using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO.Compression;
 using Cinemachine;
 using KBCore.Refs;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace Coraline
+namespace Coraline {
+public class CameraManager : MonoBehaviour
 {
-    public class CameraManager : ValidatedMonoBehaviour
-    {
-        [Header("References")] 
-        [SerializeField, Anywhere] InputReader input;
-        [SerializeField, Anywhere] CinemachineFreeLook freeLookVCam;
-
-        [Header("Settings")]
-        [SerializeField, Range(0.5f, 3f)] float speedMult = 1f;
-
-        bool isRightMouseButtonPressed;
-        bool cameraMovementLock;
-
-        IEnumerator DisableMouseForFrame()
-        {
-            cameraMovementLock = true;
-            yield return new WaitForEndOfFrame();
-            cameraMovementLock = false;
-        }
-        
-        void OnEnableMouseControlCamera()
-        {
-            isRightMouseButtonPressed = true;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
-            StartCoroutine(DisableMouseForFrame());
-        }
-        
-        void OnDisableMouseControlCamera()
-        {
-            isRightMouseButtonPressed = false;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-
-            freeLookVCam.m_XAxis.m_InputAxisValue = 0f;
-            freeLookVCam.m_YAxis.m_InputAxisValue = 0f;
-        }
-
-        void OnLook(Vector2 cameraMove, bool isDeviceMouse)
-        {
-            if (cameraMovementLock) return;
-            if (isDeviceMouse && !isRightMouseButtonPressed) return;
-
-            float deviceMult = isDeviceMouse ? Time.fixedDeltaTime : Time.deltaTime;
-            freeLookVCam.m_XAxis.m_InputAxisValue = cameraMove.x * speedMult * deviceMult;
-            freeLookVCam.m_YAxis.m_InputAxisValue = cameraMove.y * speedMult * deviceMult;
-        }
-        void OnEnable()
-        {
-            input.Look += OnLook;
-            input.EnableMouseControlCamera += OnEnableMouseControlCamera;
-            input.DisableMouseControlCamera += OnDisableMouseControlCamera;
-        }
-        
-        void OnDisable()
-        {
-            input.Look -= OnLook;
-            input.EnableMouseControlCamera -= OnEnableMouseControlCamera;
-            input.DisableMouseControlCamera -= OnDisableMouseControlCamera;
-        }
+    [FormerlySerializedAs("_freeLook")]
+    [Header("References")]
+    [SerializeField, Anywhere] private InputReader input;
+    [SerializeField, Anywhere] private CinemachineFreeLook freeLook;
+    [SerializeField, Anywhere] private Rigidbody player;
+    
+    [Header("Settings")]
+    [SerializeField, Range(0f, 10f)] private float rotationSpeed = 10f; 
+    
+    // Start is called before the first frame update
+    void OnEnable() {
+        input.Look += OnLook;
     }
+        
+    void OnDisable() {
+        input.Look -= OnLook;
+    }
+    
+    private const float LimitAngle = 75;
+    private const float AngleStep = 1;
+
+    private void Update()
+    {
+    }
+    
+    private void OnLook(Vector2 cameraMovement, bool isDeviceMouse) {
+        if (!isDeviceMouse) return;
+
+        var deviceMultiplier = Time.fixedDeltaTime;
+        var mousePosition = Input.mousePosition;
+        var isOnBorder = mousePosition.x <= 0 || mousePosition.x >= Screen.width;
+        if (!isOnBorder) {
+            freeLook.m_XAxis.m_InputAxisValue = cameraMovement.x * rotationSpeed * deviceMultiplier;
+        }
+        else
+        {
+            freeLook.m_XAxis.m_InputAxisValue = 0;
+        }
+        
+    }
+
+}
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cinemachine;
 using KBCore.Refs;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Utilities;
 
 namespace Coraline {
@@ -10,7 +11,7 @@ namespace Coraline {
         [SerializeField, Self] private Rigidbody rb;
         [SerializeField, Self] private GroundChecker groundChecker;
         [SerializeField, Self] private Animator animator;
-        [SerializeField, Anywhere] private CinemachineFreeLook freeLookVCam;
+        [SerializeField, Anywhere] CinemachineFreeLook freeLookVCam;
         [SerializeField, Anywhere] private InputReader input;
         
         [Header("Movement Settings")]
@@ -19,10 +20,10 @@ namespace Coraline {
         [SerializeField] private float smoothTime = 0.2f;
         
         [Header("Jump Settings")]
-        [SerializeField] private float jumpForce = 10f;
-        [SerializeField] private float jumpDuration = 0.5f;
+        [SerializeField] private float jumpForce = 7f;
+        [SerializeField] private float jumpDuration = 0.4f;
         [SerializeField] private float jumpCooldown;
-        [SerializeField] private float gravityMultiplier = 3f;
+        [SerializeField] private float gravityMultiplier = 6f;
         
 
         private const float ZeroF = 0f;
@@ -49,7 +50,7 @@ namespace Coraline {
             freeLookVCam.Follow = varTransform;
             freeLookVCam.LookAt = varTransform;
             freeLookVCam.OnTargetObjectWarped(varTransform, varTransform.position - freeLookVCam.transform.position - Vector3.forward);
-            
+
             rb.freezeRotation = true;
             
             SetupTimers();
@@ -143,13 +144,19 @@ namespace Coraline {
             rb.velocity = new Vector3(velocity.x, _jumpVelocity, velocity.z);
         }
 
-        public void HandleMovement() {
+        public void HandleMovement()
+        {
+            var cameraRotation = _mainCam.rotation;
+            cameraRotation.y = 0;
             var adjustedDirection = Quaternion.AngleAxis(_mainCam.eulerAngles.y, Vector3.up) * _movement;
+            var finalDirection = cameraRotation * adjustedDirection;
+            finalDirection.y = adjustedDirection.y;
+            // adjust direction based on camera rotation
             
-            if (adjustedDirection.magnitude > ZeroF) {
-                HandleRotation(adjustedDirection);
-                HandleHorizontalMovement(adjustedDirection);
-                SmoothSpeed(adjustedDirection.magnitude);
+            if (finalDirection.magnitude > ZeroF) {
+                HandleRotation(finalDirection);
+                HandleHorizontalMovement(finalDirection);
+                SmoothSpeed(finalDirection.magnitude);
             } else {
                 SmoothSpeed(ZeroF);
                 

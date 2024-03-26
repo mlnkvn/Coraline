@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using KBCore.Refs;
@@ -143,7 +144,7 @@ namespace Coraline {
             var velocity = rb.velocity;
             rb.velocity = new Vector3(velocity.x, _jumpVelocity, velocity.z);
         }
-
+        
         public void HandleMovement()
         {
             var cameraRotation = _mainCam.rotation;
@@ -151,15 +152,17 @@ namespace Coraline {
             var adjustedDirection = Quaternion.AngleAxis(_mainCam.eulerAngles.y, Vector3.up) * _movement;
             var finalDirection = cameraRotation * adjustedDirection;
             finalDirection.y = adjustedDirection.y;
-            // adjust direction based on camera rotation
+            
             
             if (finalDirection.magnitude > ZeroF) {
                 HandleRotation(finalDirection);
                 HandleHorizontalMovement(finalDirection);
                 SmoothSpeed(finalDirection.magnitude);
+                freeLookVCam.m_RecenterToTargetHeading.m_enabled = true;
+                
             } else {
                 SmoothSpeed(ZeroF);
-                
+
                 rb.velocity = new Vector3(ZeroF, rb.velocity.y, ZeroF);
             }
         }
@@ -172,6 +175,7 @@ namespace Coraline {
         void HandleRotation(Vector3 adjustedDirection) {
             var targetRotation = Quaternion.LookRotation(adjustedDirection);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            freeLookVCam.transform.rotation = Quaternion.RotateTowards(freeLookVCam.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime * 5f);
         }
 
         void SmoothSpeed(float value) {

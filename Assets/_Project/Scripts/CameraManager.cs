@@ -33,7 +33,7 @@ public class CameraManager : MonoBehaviour
         var mousePosition = Input.mousePosition;
         var isOnBorder = mousePosition.x <= 0 || mousePosition.x >= Screen.width;
         if (!isOnBorder) {
-            freeLook.m_XAxis.m_InputAxisValue = cameraMovement.x * rotationSpeed * deviceMultiplier;
+            freeLook.m_XAxis.m_InputAxisValue = 5 * cameraMovement.x * rotationSpeed * deviceMultiplier;
         }
         else
         {

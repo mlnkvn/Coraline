@@ -11,7 +11,7 @@ namespace Coraline {
         [SerializeField, Self] private Rigidbody rb;
         [SerializeField, Self] private GroundChecker groundChecker;
         [SerializeField, Self] private Animator animator;
-        [SerializeField, Anywhere] CinemachineFreeLook freeLookVCam;
+        [SerializeField, Anywhere] private CinemachineFreeLook freeLookVCam;
         [SerializeField, Anywhere] private InputReader input;
         
         [Header("Movement Settings")]
@@ -23,7 +23,7 @@ namespace Coraline {
         [SerializeField] private float jumpForce = 7f;
         [SerializeField] private float jumpDuration = 0.4f;
         [SerializeField] private float jumpCooldown;
-        [SerializeField] private float gravityMultiplier = 6f;
+        [SerializeField] private float gravityMultiplier = 7f;
         
 
         private const float ZeroF = 0f;

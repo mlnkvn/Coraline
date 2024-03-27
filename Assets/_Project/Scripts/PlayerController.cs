@@ -1,8 +1,10 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cinemachine;
 using KBCore.Refs;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using Utilities;
 
@@ -14,6 +16,7 @@ namespace Coraline {
         [SerializeField, Self] private Animator animator;
         [SerializeField, Anywhere] private CinemachineFreeLook freeLookVCam;
         [SerializeField, Anywhere] private InputReader input;
+        [SerializeField, Anywhere] public GameObject myHands;
         
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 6f;
@@ -26,7 +29,13 @@ namespace Coraline {
         [SerializeField] private float jumpCooldown;
         [SerializeField] private float gravityMultiplier = 7f;
         
+        [Header("Pick Settings")]
+        [SerializeField] private List<GameObject> pickableObjects = new ();
 
+
+        private bool canPickUp;
+        private bool hasItem;
+        
         private const float ZeroF = 0f;
         
         private Transform _mainCam;
@@ -75,7 +84,7 @@ namespace Coraline {
             return groundChecker.IsGrounded && !_jumpTimer.IsRunning;
         }
 
-        void SetupTimers() {
+        private void SetupTimers() {
             // Setup timers
             _jumpTimer = new CountdownTimer(jumpDuration);
             _jumpCooldownTimer = new CountdownTimer(jumpCooldown);
@@ -89,14 +98,21 @@ namespace Coraline {
         private void At(IState from, IState to, IPredicate condition) => _stateMachine.AddTransition(from, to, condition);
         private void Any(IState to, IPredicate condition) => _stateMachine.AddAnyTransition(to, condition);
 
-        private void Start() => input.EnablePlayerActions();
+        private void Start()
+        {
+            input.EnablePlayerActions();
+            canPickUp = true;
+            hasItem = false;
+        }
 
         private void OnEnable() {
             input.Jump += OnJump;
+            input.Pick += OnPick;
         }
         
         private void OnDisable() {
             input.Jump -= OnJump;
+            input.Pick -= OnPick;
         }
         private void OnJump(bool performed) {
             if (performed && !_jumpTimer.IsRunning && !_jumpCooldownTimer.IsRunning && groundChecker.IsGrounded) {
@@ -105,8 +121,23 @@ namespace Coraline {
                 _jumpTimer.Stop();
             }
         }
+        private void OnPick(bool performed)
+        {
+            
+            if (!performed || !canPickUp || hasItem) return;
+            // iterate over the objects
+            foreach (var objectToPickUp in pickableObjects.Where(objectToPickUp => Vector3.Distance(objectToPickUp.transform.position, transform.position) <= 2f))
+            {
+                objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;
+                objectToPickUp.GetComponent<BoxCollider>().enabled = false;
+                objectToPickUp.transform.position = myHands.transform.position;
+                objectToPickUp.transform.rotation = myHands.transform.rotation;
+                objectToPickUp.transform.parent = myHands.transform;
+                hasItem = true;
+            }
+        }
 
-        void Update() {
+        private void Update() {
             _movement = new Vector3(input.Direction.x, 0f, input.Direction.y);
             _stateMachine.Update();
 
@@ -114,15 +145,15 @@ namespace Coraline {
             UpdateAnimator();
         }
 
-        void FixedUpdate() {
+        private void FixedUpdate() {
             _stateMachine.FixedUpdate();
         }
 
-        void UpdateAnimator() {
+        private void UpdateAnimator() {
             animator.SetFloat(Speed, _currentSpeed);
         }
 
-        void HandleTimers() {
+        private void HandleTimers() {
             foreach (var timer in _timers) {
                 timer.Tick(Time.deltaTime);
             }
@@ -131,13 +162,14 @@ namespace Coraline {
         public void HandleJump() {
             if (!groundChecker.IsGrounded) return;
             
-            if (!_jumpTimer.IsRunning && groundChecker.IsGrounded) {
-                _jumpVelocity = ZeroF;
-                return;
-            }
-            
-            if (!_jumpTimer.IsRunning) {
-                _jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
+            switch (_jumpTimer.IsRunning)
+            {
+                case false when groundChecker.IsGrounded:
+                    _jumpVelocity = ZeroF;
+                    return;
+                case false:
+                    _jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
+                    break;
             }
 
 
@@ -167,18 +199,18 @@ namespace Coraline {
             }
         }
 
-        void HandleHorizontalMovement(Vector3 adjustedDirection) {
-            Vector3 velocity = adjustedDirection * (moveSpeed * Time.fixedDeltaTime);
+        private void HandleHorizontalMovement(Vector3 adjustedDirection) {
+            var velocity = adjustedDirection * (moveSpeed * Time.fixedDeltaTime);
             rb.velocity = new Vector3(velocity.x, rb.velocity.y, velocity.z);
         }
 
-        void HandleRotation(Vector3 adjustedDirection) {
+        private void HandleRotation(Vector3 adjustedDirection) {
             var targetRotation = Quaternion.LookRotation(adjustedDirection);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             freeLookVCam.transform.rotation = Quaternion.RotateTowards(freeLookVCam.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime * 5f);
         }
 
-        void SmoothSpeed(float value) {
+        private void SmoothSpeed(float value) {
             _currentSpeed = Mathf.SmoothDamp(_currentSpeed, value, ref _velocity, smoothTime);
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -8,7 +9,11 @@ namespace Coraline {
     public class InputReader : ScriptableObject, IPlayerActions {
         public event UnityAction<Vector2> Move = delegate { };
         public event UnityAction<Vector2, bool> Look = delegate { };
+        public event UnityAction EnableMouseControlCamera = delegate { };
+        public event UnityAction DisableMouseControlCamera = delegate { };
         public event UnityAction<bool> Jump = delegate { };
+        
+        public event UnityAction<bool> Pick = delegate { };
 
         private PlayerInputActions _inputActions;
         
@@ -39,6 +44,14 @@ namespace Coraline {
         }
 
         public void OnMouseControlCamera(InputAction.CallbackContext context) {
+            switch (context.phase) {
+                case InputActionPhase.Started:
+                    EnableMouseControlCamera.Invoke();
+                    break;
+                case InputActionPhase.Canceled:
+                    DisableMouseControlCamera.Invoke();
+                    break;
+            }
         }
 
         public void OnRun(InputAction.CallbackContext context) {
@@ -51,6 +64,18 @@ namespace Coraline {
                     break;
                 case InputActionPhase.Canceled:
                     Jump.Invoke(false);
+                    break;
+            }
+        }
+
+        public void OnPick(InputAction.CallbackContext context)
+        {
+            switch (context.phase) {
+                case InputActionPhase.Started:
+                    Pick.Invoke(true);
+                    break;
+                case InputActionPhase.Canceled:
+                    Pick.Invoke(false);
                     break;
             }
         }

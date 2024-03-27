@@ -16,14 +16,18 @@ public class CameraManager : MonoBehaviour
     
     [Header("Settings")]
     [SerializeField, Range(0f, 10f)] private float rotationSpeed = 10f; 
-    
-    // Start is called before the first frame update
+    bool isRMBPressed;
+    bool cameraMovementLock;
     private void OnEnable() {
         input.Look += OnLook;
+        input.EnableMouseControlCamera += OnEnableMouseControlCamera;
+        input.DisableMouseControlCamera += OnDisableMouseControlCamera;
     }
 
     private void OnDisable() {
         input.Look -= OnLook;
+        input.EnableMouseControlCamera -= OnEnableMouseControlCamera;
+        input.DisableMouseControlCamera -= OnDisableMouseControlCamera;
     }
     
     private void OnLook(Vector2 cameraMovement, bool isDeviceMouse) {
@@ -31,15 +35,35 @@ public class CameraManager : MonoBehaviour
 
         var deviceMultiplier = Time.fixedDeltaTime;
         var mousePosition = Input.mousePosition;
-        var isOnBorder = mousePosition.x <= 0 || mousePosition.x >= Screen.width;
-        if (!isOnBorder) {
-            freeLook.m_XAxis.m_InputAxisValue = 5 * cameraMovement.x * rotationSpeed * deviceMultiplier;
-        }
-        else
-        {
-            freeLook.m_XAxis.m_InputAxisValue = 0;
-        }
-        
+        var isNotOnBorderX = mousePosition.x > 0 || mousePosition.x < Screen.width;
+        var isNotOnBorderY = mousePosition.y > 0 || mousePosition.y < Screen.height;
+        freeLook.m_XAxis.m_InputAxisValue = isNotOnBorderX ? 5 * cameraMovement.x * rotationSpeed * deviceMultiplier : 0;
+        freeLook.m_YAxis.m_InputAxisValue = isNotOnBorderY ? 5 * cameraMovement.y * rotationSpeed * deviceMultiplier : 0;
+    }
+    
+    void OnEnableMouseControlCamera() {
+        isRMBPressed = true;
+            
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+            
+        StartCoroutine(DisableMouseForFrame());
+    }
+
+    void OnDisableMouseControlCamera() {
+        isRMBPressed = false;
+            
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+            
+        freeLook.m_XAxis.m_InputAxisValue = 0f;
+        freeLook.m_YAxis.m_InputAxisValue = 0f;
+    }
+
+    IEnumerator DisableMouseForFrame() {
+        cameraMovementLock = true;
+        yield return new WaitForEndOfFrame();
+        cameraMovementLock = false;
     }
 
 }

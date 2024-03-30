@@ -1,6 +1,5 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO.Compression;
 using Cinemachine;
 using KBCore.Refs;
 using UnityEngine;
@@ -13,21 +12,21 @@ public class CameraManager : MonoBehaviour
     [Header("References")]
     [SerializeField, Anywhere] private InputReader input;
     [SerializeField, Anywhere] private CinemachineFreeLook freeLook;
-    
+    [SerializeField, Anywhere] private Shader grayscaleShader;
+    [SerializeField, Anywhere] private Shader defaultShader;
+    [SerializeField, Anywhere] private Shader hintShader;
     [Header("Settings")]
     [SerializeField, Range(0f, 10f)] private float rotationSpeed = 10f; 
-    bool isRMBPressed;
-    bool cameraMovementLock;
+    
     private void OnEnable() {
+        defaultShader = Shader.Find("Universal Render Pipeline/Lit");
         input.Look += OnLook;
-        input.EnableMouseControlCamera += OnEnableMouseControlCamera;
-        input.DisableMouseControlCamera += OnDisableMouseControlCamera;
+        input.LookThroughStone += OnLookThroughStone;
     }
 
     private void OnDisable() {
         input.Look -= OnLook;
-        input.EnableMouseControlCamera -= OnEnableMouseControlCamera;
-        input.DisableMouseControlCamera -= OnDisableMouseControlCamera;
+        input.LookThroughStone -= OnLookThroughStone;
     }
     
     private void OnLook(Vector2 cameraMovement, bool isDeviceMouse) {
@@ -40,31 +39,32 @@ public class CameraManager : MonoBehaviour
         freeLook.m_XAxis.m_InputAxisValue = isNotOnBorderX ? 5 * cameraMovement.x * rotationSpeed * deviceMultiplier : 0;
         freeLook.m_YAxis.m_InputAxisValue = isNotOnBorderY ? 5 * cameraMovement.y * rotationSpeed * deviceMultiplier : 0;
     }
+
+    private readonly string[] targetedObjects = { "Hidden Door" };
     
-    void OnEnableMouseControlCamera() {
-        isRMBPressed = true;
-            
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-            
-        StartCoroutine(DisableMouseForFrame());
+    private void OnLookThroughStone(bool isLookingThroughStone)
+    {
+        var player = GameObject.Find("Player").GetComponent<PlayerController>();
+        if (!player.hasItem || !player.myHands.transform.GetChild(0).CompareTag("Magic Stone"))
+        {
+            return;
+        }
+        var bigRoom = GameObject.FindWithTag("BigRoom");
+        foreach (var obj in bigRoom.GetComponentsInChildren<Transform>())
+        {
+            if (obj.CompareTag("Hidden Door"))
+            {
+                Debug.Log("wsdkeikfc");
+            }
+            var objRenderer = obj.GetComponent<Renderer>();
+            if (objRenderer == null) continue;
+            foreach (var material in objRenderer.materials)
+            {
+                var shader = Array.IndexOf(targetedObjects, obj.tag) == -1 ? grayscaleShader : hintShader;
+                material.shader = isLookingThroughStone ? shader : defaultShader;
+            }
+        }
+        
     }
-
-    void OnDisableMouseControlCamera() {
-        isRMBPressed = false;
-            
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-            
-        freeLook.m_XAxis.m_InputAxisValue = 0f;
-        freeLook.m_YAxis.m_InputAxisValue = 0f;
-    }
-
-    IEnumerator DisableMouseForFrame() {
-        cameraMovementLock = true;
-        yield return new WaitForEndOfFrame();
-        cameraMovementLock = false;
-    }
-
 }
 }

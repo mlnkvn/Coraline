@@ -34,7 +34,7 @@ namespace Coraline {
 
 
         private bool canPickUp;
-        private bool hasItem;
+        internal bool hasItem;
         
         private const float ZeroF = 0f;
         
@@ -125,9 +125,9 @@ namespace Coraline {
         {
             
             if (!performed || !canPickUp || hasItem) return;
-            // iterate over the objects
             foreach (var objectToPickUp in pickableObjects.Where(objectToPickUp => Vector3.Distance(objectToPickUp.transform.position, transform.position) <= 2f))
             {
+                var distance = Vector3.Distance(objectToPickUp.transform.position, transform.position);
                 objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;
                 objectToPickUp.GetComponent<BoxCollider>().enabled = false;
                 objectToPickUp.transform.position = myHands.transform.position;

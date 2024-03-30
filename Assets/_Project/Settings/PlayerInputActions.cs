@@ -55,15 +55,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""MouseControlCamera"",
-                    ""type"": ""Button"",
-                    ""id"": ""f7771a84-db1d-4415-9f27-2e3aec04a6cf"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Run"",
                     ""type"": ""Button"",
                     ""id"": ""33d00ec1-bad8-4d9b-87b7-83e652d0dd44"",
@@ -85,6 +76,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""name"": ""Pick"",
                     ""type"": ""Button"",
                     ""id"": ""38398974-3566-42d7-b1ed-b5b56c657a6e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LookThroughStone"",
+                    ""type"": ""Button"",
+                    ""id"": ""ee87b3f1-e37f-45e3-ace7-35a7b5f2021c"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -314,17 +314,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""b1466427-4643-439e-9509-802a52ea6d20"",
-                    ""path"": ""<Mouse>/rightButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""KeyboardOrGamepad"",
-                    ""action"": ""MouseControlCamera"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""e450180a-6fb2-4d82-8929-fb205b518df0"",
                     ""path"": ""<Keyboard>/shift"",
                     ""interactions"": """",
@@ -386,6 +375,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Pick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""032c2048-8d8a-406d-9dfa-baf3262a89ac"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookThroughStone"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -976,10 +976,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
-        m_Player_MouseControlCamera = m_Player.FindAction("MouseControlCamera", throwIfNotFound: true);
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Pick = m_Player.FindAction("Pick", throwIfNotFound: true);
+        m_Player_LookThroughStone = m_Player.FindAction("LookThroughStone", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1056,10 +1056,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Fire;
-    private readonly InputAction m_Player_MouseControlCamera;
     private readonly InputAction m_Player_Run;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Pick;
+    private readonly InputAction m_Player_LookThroughStone;
     public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -1067,10 +1067,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
-        public InputAction @MouseControlCamera => m_Wrapper.m_Player_MouseControlCamera;
         public InputAction @Run => m_Wrapper.m_Player_Run;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
         public InputAction @Pick => m_Wrapper.m_Player_Pick;
+        public InputAction @LookThroughStone => m_Wrapper.m_Player_LookThroughStone;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1089,9 +1089,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Fire.started += instance.OnFire;
             @Fire.performed += instance.OnFire;
             @Fire.canceled += instance.OnFire;
-            @MouseControlCamera.started += instance.OnMouseControlCamera;
-            @MouseControlCamera.performed += instance.OnMouseControlCamera;
-            @MouseControlCamera.canceled += instance.OnMouseControlCamera;
             @Run.started += instance.OnRun;
             @Run.performed += instance.OnRun;
             @Run.canceled += instance.OnRun;
@@ -1101,6 +1098,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Pick.started += instance.OnPick;
             @Pick.performed += instance.OnPick;
             @Pick.canceled += instance.OnPick;
+            @LookThroughStone.started += instance.OnLookThroughStone;
+            @LookThroughStone.performed += instance.OnLookThroughStone;
+            @LookThroughStone.canceled += instance.OnLookThroughStone;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1114,9 +1114,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Fire.started -= instance.OnFire;
             @Fire.performed -= instance.OnFire;
             @Fire.canceled -= instance.OnFire;
-            @MouseControlCamera.started -= instance.OnMouseControlCamera;
-            @MouseControlCamera.performed -= instance.OnMouseControlCamera;
-            @MouseControlCamera.canceled -= instance.OnMouseControlCamera;
             @Run.started -= instance.OnRun;
             @Run.performed -= instance.OnRun;
             @Run.canceled -= instance.OnRun;
@@ -1126,6 +1123,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Pick.started -= instance.OnPick;
             @Pick.performed -= instance.OnPick;
             @Pick.canceled -= instance.OnPick;
+            @LookThroughStone.started -= instance.OnLookThroughStone;
+            @LookThroughStone.performed -= instance.OnLookThroughStone;
+            @LookThroughStone.canceled -= instance.OnLookThroughStone;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1311,10 +1311,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
-        void OnMouseControlCamera(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnPick(InputAction.CallbackContext context);
+        void OnLookThroughStone(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

@@ -33,15 +33,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MouseControlCamera",
-                    "type": "Button",
-                    "id": "f7771a84-db1d-4415-9f27-2e3aec04a6cf",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Run",
                     "type": "Button",
                     "id": "33d00ec1-bad8-4d9b-87b7-83e652d0dd44",
@@ -63,6 +54,15 @@
                     "name": "Pick",
                     "type": "Button",
                     "id": "38398974-3566-42d7-b1ed-b5b56c657a6e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LookThroughStone",
+                    "type": "Button",
+                    "id": "ee87b3f1-e37f-45e3-ace7-35a7b5f2021c",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -292,17 +292,6 @@
                 },
                 {
                     "name": "",
-                    "id": "b1466427-4643-439e-9509-802a52ea6d20",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "KeyboardOrGamepad",
-                    "action": "MouseControlCamera",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "e450180a-6fb2-4d82-8929-fb205b518df0",
                     "path": "<Keyboard>/shift",
                     "interactions": "",
@@ -364,6 +353,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Pick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "032c2048-8d8a-406d-9dfa-baf3262a89ac",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LookThroughStone",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

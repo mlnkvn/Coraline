@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Magic Stone
+  - BigRoom
+  - Hidden Door
   layers:
   - Default
   - TransparentFX

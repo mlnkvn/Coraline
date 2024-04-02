@@ -8,6 +8,7 @@ TagManager:
   - BigRoom
   - Hidden Door
   - Needed Key
+  - DoorToHint
   layers:
   - Default
   - TransparentFX

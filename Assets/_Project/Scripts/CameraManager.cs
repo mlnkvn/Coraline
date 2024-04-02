@@ -44,7 +44,7 @@ public class CameraManager : MonoBehaviour
         freeLook.m_YAxis.m_InputAxisValue = isNotOnBorderY ? 5 * cameraMovement.y * rotationSpeed * deviceMultiplier : 0;
     }
 
-    private readonly string[] targetedObjects = { "Hidden Door", "Needed Key" };
+    private readonly string[] targetedObjects = { "DoorToHint", "Needed Key" };
     
 
     private void OnLookThroughStone(bool isLookingThroughStone)

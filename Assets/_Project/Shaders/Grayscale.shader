@@ -7,7 +7,7 @@ Shader "Universal Render Pipeline/Grayscale"
 
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "RenderQueue" = "Background" }
 
         Pass
         {

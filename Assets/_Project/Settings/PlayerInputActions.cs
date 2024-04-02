@@ -73,7 +73,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Pick"",
+                    ""name"": ""ObjectInteract"",
                     ""type"": ""Button"",
                     ""id"": ""38398974-3566-42d7-b1ed-b5b56c657a6e"",
                     ""expectedControlType"": ""Button"",
@@ -374,7 +374,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Pick"",
+                    ""action"": ""ObjectInteract"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -978,7 +978,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
-        m_Player_Pick = m_Player.FindAction("Pick", throwIfNotFound: true);
+        m_Player_ObjectInteract = m_Player.FindAction("ObjectInteract", throwIfNotFound: true);
         m_Player_LookThroughStone = m_Player.FindAction("LookThroughStone", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
@@ -1058,7 +1058,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Fire;
     private readonly InputAction m_Player_Run;
     private readonly InputAction m_Player_Jump;
-    private readonly InputAction m_Player_Pick;
+    private readonly InputAction m_Player_ObjectInteract;
     private readonly InputAction m_Player_LookThroughStone;
     public struct PlayerActions
     {
@@ -1069,7 +1069,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
         public InputAction @Run => m_Wrapper.m_Player_Run;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
-        public InputAction @Pick => m_Wrapper.m_Player_Pick;
+        public InputAction @ObjectInteract => m_Wrapper.m_Player_ObjectInteract;
         public InputAction @LookThroughStone => m_Wrapper.m_Player_LookThroughStone;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
@@ -1095,9 +1095,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
-            @Pick.started += instance.OnPick;
-            @Pick.performed += instance.OnPick;
-            @Pick.canceled += instance.OnPick;
+            @ObjectInteract.started += instance.OnObjectInteract;
+            @ObjectInteract.performed += instance.OnObjectInteract;
+            @ObjectInteract.canceled += instance.OnObjectInteract;
             @LookThroughStone.started += instance.OnLookThroughStone;
             @LookThroughStone.performed += instance.OnLookThroughStone;
             @LookThroughStone.canceled += instance.OnLookThroughStone;
@@ -1120,9 +1120,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
-            @Pick.started -= instance.OnPick;
-            @Pick.performed -= instance.OnPick;
-            @Pick.canceled -= instance.OnPick;
+            @ObjectInteract.started -= instance.OnObjectInteract;
+            @ObjectInteract.performed -= instance.OnObjectInteract;
+            @ObjectInteract.canceled -= instance.OnObjectInteract;
             @LookThroughStone.started -= instance.OnLookThroughStone;
             @LookThroughStone.performed -= instance.OnLookThroughStone;
             @LookThroughStone.canceled -= instance.OnLookThroughStone;
@@ -1313,7 +1313,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnFire(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
-        void OnPick(InputAction.CallbackContext context);
+        void OnObjectInteract(InputAction.CallbackContext context);
         void OnLookThroughStone(InputAction.CallbackContext context);
     }
     public interface IUIActions

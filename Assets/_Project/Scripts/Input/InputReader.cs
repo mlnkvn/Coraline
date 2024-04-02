@@ -11,7 +11,7 @@ namespace Coraline {
         public event UnityAction<Vector2, bool> Look = delegate { };
         public event UnityAction<bool> Jump = delegate { };
         
-        public event UnityAction<bool> Pick = delegate { };
+        public event UnityAction<bool> ObjectInteract = delegate { };
         public event UnityAction<bool> LookThroughStone = delegate { };
 
         private PlayerInputActions _inputActions;
@@ -56,14 +56,14 @@ namespace Coraline {
             }
         }
 
-        public void OnPick(InputAction.CallbackContext context)
+        public void OnObjectInteract(InputAction.CallbackContext context)
         {
             switch (context.phase) {
                 case InputActionPhase.Started:
-                    Pick.Invoke(true);
+                    ObjectInteract.Invoke(true);
                     break;
                 case InputActionPhase.Canceled:
-                    Pick.Invoke(false);
+                    ObjectInteract.Invoke(false);
                     break;
             }
         }

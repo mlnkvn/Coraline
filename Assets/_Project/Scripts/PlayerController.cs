@@ -16,7 +16,8 @@ namespace Coraline {
         [SerializeField, Self] private Animator animator;
         [SerializeField, Anywhere] private CinemachineFreeLook freeLookVCam;
         [SerializeField, Anywhere] private InputReader input;
-        [SerializeField, Anywhere] public GameObject myHands;
+        [SerializeField, Anywhere] public GameObject myLeftHand;
+        [SerializeField, Anywhere] public GameObject myRightHand;
         
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 6f;
@@ -28,13 +29,13 @@ namespace Coraline {
         [SerializeField] private float jumpDuration = 0.4f;
         [SerializeField] private float jumpCooldown;
         [SerializeField] private float gravityMultiplier = 7f;
-        
-        [Header("Pick Settings")]
-        [SerializeField] private List<GameObject> pickableObjects = new ();
+
+        [Header("Interact Settings")]
+        [SerializeField] private List<GameObject> interactableObjects = new ();
 
 
-        private bool canPickUp;
-        internal bool hasItem;
+        internal bool hasItemLeft;
+        internal bool hasItemRight;
         
         private const float ZeroF = 0f;
         
@@ -63,6 +64,12 @@ namespace Coraline {
 
             rb.freezeRotation = true;
             
+            var localRenderer = GetComponent<Renderer>();
+            if (localRenderer)
+            {
+                localRenderer.material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+            }
+            
             SetupTimers();
             SetupStateMachine();
         }
@@ -85,7 +92,6 @@ namespace Coraline {
         }
 
         private void SetupTimers() {
-            // Setup timers
             _jumpTimer = new CountdownTimer(jumpDuration);
             _jumpCooldownTimer = new CountdownTimer(jumpCooldown);
 
@@ -101,39 +107,56 @@ namespace Coraline {
         private void Start()
         {
             input.EnablePlayerActions();
-            canPickUp = true;
-            hasItem = false;
+            hasItemLeft = false;
+            hasItemRight = false;
         }
 
         private void OnEnable() {
             input.Jump += OnJump;
-            input.Pick += OnPick;
+            input.ObjectInteract += OnObjectInteract;
         }
         
         private void OnDisable() {
             input.Jump -= OnJump;
-            input.Pick -= OnPick;
+            input.ObjectInteract -= OnObjectInteract;
         }
-        private void OnJump(bool performed) {
-            if (performed && !_jumpTimer.IsRunning && !_jumpCooldownTimer.IsRunning && groundChecker.IsGrounded) {
+
+        private void OnJump(bool performed)
+        {
+            if (performed && !_jumpTimer.IsRunning && !_jumpCooldownTimer.IsRunning && groundChecker.IsGrounded)
+            {
                 _jumpTimer.Start();
-            } else if (!performed && _jumpTimer.IsRunning) {
+            }
+            else if (!performed && _jumpTimer.IsRunning)
+            {
                 _jumpTimer.Stop();
             }
         }
-        private void OnPick(bool performed)
+
+        private const float interactableDistance = 2f;
+
+        private bool IsReachable(GameObject targetObject)
         {
-            
-            if (!performed || !canPickUp || hasItem) return;
-            foreach (var objectToPickUp in pickableObjects.Where(objectToPickUp => Vector3.Distance(objectToPickUp.transform.position, transform.position) <= 2f))
+            return Vector3.Distance(targetObject.transform.position, transform.position) <= interactableDistance;
+        }
+
+        internal bool HoldsObject(string objectTag)
+        {
+            return hasItemLeft && myLeftHand.transform.GetChild(0).CompareTag(objectTag) ||
+                   hasItemRight && myRightHand.transform.GetChild(0).CompareTag(objectTag);
+        }
+        
+        private void OnObjectInteract(bool performed)
+        {
+            if (!performed) return;
+            foreach (var targetObject in interactableObjects.Where(IsReachable))
             {
-                var distance = Vector3.Distance(objectToPickUp.transform.position, transform.position);
-                objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;
-                objectToPickUp.GetComponent<BoxCollider>().enabled = false;
-                objectToPickUp.transform.position = myHands.transform.position;
-                objectToPickUp.transform.rotation = myHands.transform.rotation;
-                objectToPickUp.transform.parent = myHands.transform;
-                hasItem = true;
+                if (hasItemLeft && myLeftHand.transform.GetChild(0) == targetObject.transform ||
+                    hasItemRight && myRightHand.transform.GetChild(0) == targetObject.transform)
+                {
+                    continue;
+                }
+                targetObject.GetComponent<InteractController>().Interact();
             }
         }
 
@@ -161,7 +184,6 @@ namespace Coraline {
 
         public void HandleJump() {
             if (!groundChecker.IsGrounded) return;
-            
             switch (_jumpTimer.IsRunning)
             {
                 case false when groundChecker.IsGrounded:
@@ -171,7 +193,6 @@ namespace Coraline {
                     _jumpVelocity += Physics.gravity.y * gravityMultiplier * Time.fixedDeltaTime;
                     break;
             }
-
 
             var velocity = rb.velocity;
             rb.velocity = new Vector3(velocity.x, _jumpVelocity, velocity.z);
@@ -185,16 +206,13 @@ namespace Coraline {
             var finalDirection = cameraRotation * adjustedDirection;
             finalDirection.y = adjustedDirection.y;
             
-            
             if (finalDirection.magnitude > ZeroF) {
                 HandleRotation(finalDirection);
                 HandleHorizontalMovement(finalDirection);
                 SmoothSpeed(finalDirection.magnitude);
-                freeLookVCam.m_RecenterToTargetHeading.m_enabled = true;
                 
             } else {
                 SmoothSpeed(ZeroF);
-
                 rb.velocity = new Vector3(ZeroF, rb.velocity.y, ZeroF);
             }
         }
